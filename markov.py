@@ -1,50 +1,44 @@
 import numpy as np
+import pandas as pd
 from collections import defaultdict
 
-def build_transition_matrix(data, order=3):
+def analyse_markov(bitmap_df, ordre=3):
     """
-    Construit une matrice de transition markovienne d'ordre supérieur.
+    Analyse markovienne d'ordre supérieur (par défaut ordre 3) sur l'historique.
+    Retourne les probabilités de transition pour chaque combinaison possible.
     """
     transitions = defaultdict(lambda: defaultdict(int))
 
-    for i in range(len(data) - order):
-        prev_state = tuple(data[i:i + order])
-        next_state = data[i + order]
-        transitions[prev_state][next_state] += 1
+    lignes = bitmap_df.drop(columns=["date"]).values.tolist()
 
-    matrix = {}
-    for state, next_states in transitions.items():
-        total = sum(next_states.values())
-        matrix[state] = {k: v / total for k, v in next_states.items()}
+    for i in range(len(lignes) - ordre):
+        contexte = tuple(tuple(lignes[i + j]) for j in range(ordre))
+        prochaine = tuple(lignes[i + ordre])
+        transitions[contexte][prochaine] += 1
 
-    return matrix
+    probabilites = {}
 
-def predict_next_numbers(matrix, recent_sequence, top_n=5):
+    for contexte, suites in transitions.items():
+        total = sum(suites.values())
+        proba = {k: v / total for k, v in suites.items()}
+        probabilites[contexte] = proba
+
+    return probabilites
+
+def probabilite_grille(grille_binaire, model_markov, ordre=3):
     """
-    Prédit les prochaines valeurs probables à partir de la matrice.
+    Calcule la probabilité d'une grille à partir du modèle markovien.
     """
-    state = tuple(recent_sequence)
-    if state in matrix:
-        sorted_probs = sorted(matrix[state].items(), key=lambda x: x[1], reverse=True)
-        return [num for num, _ in sorted_probs[:top_n]]
-    return []
+    if len(model_markov) == 0:
+        return 0.0
 
-def analyse_markov(bitmap, order=3):
-    """
-    Applique l'analyse markovienne à l'historique bitmap.
-    """
-    historical_data = []
+    score_total = 0
+    n = len(grille_binaire)
 
-    # Convertir le bitmap en une séquence plate d’indices tirés (1 à 50)
-    for _, row in bitmap.iterrows():
-        nums = [i for i, v in enumerate(row[:-12], start=1) if v == 1]
-        historical_data.extend(nums)
+    for i in range(n - ordre):
+        contexte = tuple(grille_binaire[j] for j in range(i, i + ordre))
+        suivante = tuple(grille_binaire[i + ordre])
+        proba = model_markov.get(contexte, {}).get(suivante, 0.0001)
+        score_total += np.log(proba)
 
-    # Générer la matrice de transition
-    matrix = build_transition_matrix(historical_data, order=order)
-
-    # Extraire les dernières valeurs observées pour la prédiction
-    recent = historical_data[-order:]
-    prediction = predict_next_numbers(matrix, recent, top_n=5)
-
-    return prediction
+    return np.exp(score_total / (n - ordre))
