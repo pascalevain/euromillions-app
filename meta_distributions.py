@@ -1,37 +1,88 @@
 import pandas as pd
 import numpy as np
+import streamlit as st
+from fpdf import FPDF
 
-def analyser_meta_distribution(bitmap_df):
-    """
-    Analyse les méta-distributions en repérant les configurations statistiques globales et les cycles.
-    Retourne un dictionnaire avec des caractéristiques de régime.
-    """
-    meta_infos = {}
+# Configuration de la page
+st.set_page_config(page_title="Euromillions V4.0 Expert", layout="centered")
 
-    # Moyennes par colonne (boules 1-50)
-    moyennes = bitmap_df.iloc[:, :50].mean()
-    ecarts = bitmap_df.iloc[:, :50].std()
+# Authentification simple par mot de passe
+PASSWORD = "1701"
+mot_de_passe = st.sidebar.text_input("Mot de passe", type="password")
+if mot_de_passe != PASSWORD:
+    st.error("Accès restreint. Veuillez entrer le mot de passe.")
+    st.stop()
 
-    # Top 10 les plus probables
-    top_boules = list(moyennes.sort_values(ascending=False).head(10).index)
+st.sidebar.success("Accès confirmé. Mode Expert activé.")
 
-    meta_infos["moyennes"] = moyennes.to_dict()
-    meta_infos["ecarts_types"] = ecarts.to_dict()
-    meta_infos["top_boules"] = top_boules
+st.title("🎯 Optimisation Euromillions V4.0 - Mode Expert")
+st.markdown("_Développé par **Pascal EVAIN**_")
 
-    # Analyse de changement de régime (variation brutale de moyenne glissante)
-    rolling_mean = bitmap_df.iloc[:, :50].rolling(window=10).mean()
-    variation = rolling_mean.diff().abs().mean(axis=1)
-    points_inflexion = variation[variation > variation.mean() + variation.std()].index.tolist()
+from markov import analyse_markov
+from arima import prevision_arima, score_arima
+from context import score_contexte
+from pareto import score_pareto
+from meta_distributions import analyser_meta_distribution, score_meta_distribution
+from diagnostic import tester_toutes_les_fonctions, afficher_rapport_diagnostic
+from pdf_export import exporter_pdf
 
-    meta_infos["points_inflexion"] = points_inflexion
+# Interface principale
+st.title("📊 Lancement de l'optimisation complète")
+st.markdown("Cette version applique **l'intégralité** de la méthodologie V4.0, incluant l'analyse contextuelle, temporelle, markovienne, et les méta-distributions.")
 
-    return meta_infos
+# Chargement automatique depuis GitHub ou fichier local
+st.header("1. Importer l'historique des tirages")
 
-def score_meta_distribution(grille, meta_infos):
-    """
-    Score une grille selon sa conformité avec les top boules dominantes du régime actuel.
-    """
-    top_boules = meta_infos.get("top_boules", [])
-    score = sum(1 for b in grille if b - 1 in top_boules)
-    return score / len(grille) if grille else 0.0
+@st.cache_data
+def charger_historique():
+    try:
+        url = "https://raw.githubusercontent.com/pascalevain/euromillions-app/main/euromillions_bitmap_maj_final.csv"
+        df = pd.read_csv(url)
+        st.success(f"✅ Historique chargé depuis GitHub : {len(df)} tirages.")
+        return df
+    except Exception as e:
+        st.warning("⚠️ Impossible de charger le fichier depuis GitHub. Veuillez importer un fichier local (.csv)")
+        return None
+
+historique = charger_historique()
+
+if historique is None:
+    fichier = st.file_uploader("📂 Importer un fichier CSV local", type=["csv"])
+    if fichier:
+        historique = pd.read_csv(fichier)
+        st.success(f"✅ Fichier local chargé : {len(historique)} tirages.")
+
+if historique is not None:
+    st.dataframe(historique.tail(10))
+
+# Paramètres utilisateur
+st.header("2. Paramètres de génération")
+n_large = st.selectbox("🎯 Nombre de grilles (spectre large)", list(range(0, 21)))
+n_croisée = st.selectbox("🔁 Nombre de grilles (analyse croisée)", list(range(0, 21)))
+n_recent = st.selectbox("📉 Grilles basées sur X tirages récents", list(range(0, 21)))
+instructions = st.text_area("📋 Consignes personnalisées pour guider la génération")
+
+# Lancer l'analyse
+if st.button("🚀 Lancer l'analyse et générer les grilles optimisées"):
+    # Modules d'analyse
+    markov_result = analyse_markov(historique)
+    arima_result = prevision_arima(historique)
+    contexte = score_contexte(historique)
+    meta_result = analyser_meta_distribution(historique)
+
+    # Fusion des résultats
+    pareto_grilles = score_pareto(markov_result, arima_result, contexte, meta_result,
+                                  n_large, n_croisée, n_recent)
+
+    st.success(f"✅ {len(pareto_grilles)} grilles optimisées générées.")
+    for i, (nums, stars, score) in enumerate(pareto_grilles):
+        st.markdown(f"**Grille {i+1}** 🎱 : {' - '.join(map(str, nums))} ⭐ {' & '.join(map(str, stars))} → Score : {score:.2f}")
+
+    # Export PDF
+    exporter_pdf(pareto_grilles, instructions)
+    st.download_button("📄 Télécharger le rapport PDF", "rapport_euromillions_v4.pdf", mime="application/pdf")
+
+# Mode diagnostic (optionnel)
+if st.checkbox("🧪 Activer le mode diagnostic"):
+    resultats_test = tester_toutes_les_fonctions(historique)
+    afficher_rapport_diagnostic(resultats_test)
