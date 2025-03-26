@@ -7,9 +7,10 @@ from markov import analyse_markov
 from arima import prevision_arima, score_arima
 from context import score_contexte
 from pareto import score_pareto
-from meta_distributions import analyser_meta_distribution, score_meta_distribution
 from diagnostic import tester_toutes_les_fonctions, afficher_rapport_diagnostic
 from pdf_export import exporter_pdf
+
+from meta_functions import analyser_meta_distribution, score_meta_distribution  # <- import corrigé
 
 # Interface principale
 st.set_page_config(page_title="Euromillions V4.0 Expert", layout="centered")
@@ -47,31 +48,5 @@ if historique is not None:
 # Paramètres utilisateur
 st.header("2. Paramètres de génération")
 n_large = st.selectbox("🎯 Nombre de grilles (spectre large)", list(range(0, 21)))
-n_croisée = st.selectbox("🔁 Nombre de grilles (analyse croisée)", list(range(0, 21)))
-n_recent = st.selectbox("📉 Grilles basées sur X tirages récents", list(range(0, 21)))
-instructions = st.text_area("📋 Consignes personnalisées pour guider la génération")
+n_croisée = st.selectbox("🔁 Nombre de grilles (analyse croisée)", list(range(0,_
 
-# Lancer l'analyse
-if st.button("🚀 Lancer l'analyse et générer les grilles optimisées"):
-    # Modules d'analyse
-    markov_result = analyse_markov(historique)
-    arima_result = prevision_arima(historique)
-    contexte = score_contexte(historique)
-    meta_result = analyser_meta_distribution(historique)
-
-    # Fusion des résultats
-    pareto_grilles = score_pareto(markov_result, arima_result, contexte, meta_result,
-                                  n_large, n_croisée, n_recent)
-
-    st.success(f"✅ {len(pareto_grilles)} grilles optimisées générées.")
-    for i, (nums, stars, score) in enumerate(pareto_grilles):
-        st.markdown(f"**Grille {i+1}** 🎱 : {' - '.join(map(str, nums))} ⭐ {' & '.join(map(str, stars))} → Score : {score:.2f}")
-
-    # Export PDF
-    exporter_pdf(pareto_grilles, instructions)
-    st.download_button("📄 Télécharger le rapport PDF", "rapport_euromillions_v4.pdf", mime="application/pdf")
-
-# Mode diagnostic (optionnel)
-if st.checkbox("🧪 Activer le mode diagnostic"):
-    resultats_test = tester_toutes_les_fonctions(historique)
-    afficher_rapport_diagnostic(resultats_test)
