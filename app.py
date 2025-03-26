@@ -36,7 +36,8 @@ st.header("1. Importer l'historique des tirages")
 
 @st.cache_data
 def charger_historique_depuis_github():
-    url = "https://raw.githubusercontent.com/pascalevain/euromillions-app/main/euromillions_bitmap_maj_final.csv
+    url = url = "https://raw.githubusercontent.com/pascalevain/euromillions-app/main/euromillions_bitmap_maj_final.csv"
+
 "
     return pd.read_csv(url)
 
