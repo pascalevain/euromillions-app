@@ -1,3 +1,5 @@
+import streamlit as st
 
-# Contenu simplifié placeholder (version allégée) — à compléter
-print("Bienvenue dans l'application Euromillions V4.0 Light")
+st.set_page_config(page_title="Euromillions Optimisation V4.0", layout="centered")
+st.title("🎯 Bienvenue dans l'application Euromillions V4.0")
+st.write("L'optimisation statistique avancée est prête. Importez un fichier et lancez l'analyse.")
