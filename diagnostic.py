@@ -3,6 +3,7 @@ import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
 from collections import Counter
 import time
+import streamlit as st
 
 def prevision_arima(bitmap_df, colonne=0, ordre=(2, 1, 0), horizon=1):
     serie = bitmap_df.iloc[:, colonne].astype(float)
@@ -41,7 +42,7 @@ def diagnostic_execution(fonction, *args, **kwargs):
 
 def tester_toutes_les_fonctions(bitmap_df, grille):
     rapport = {}
-    
+
     resultat, duree = diagnostic_execution(score_arima, bitmap_df, grille)
     rapport["score_arima"] = {"valeur": resultat, "temps": duree}
 
@@ -49,3 +50,8 @@ def tester_toutes_les_fonctions(bitmap_df, grille):
     rapport["score_contexte"] = {"valeur": resultat, "temps": duree}
 
     return rapport
+
+def afficher_rapport_diagnostic(rapport):
+    st.subheader("\U0001F4CB Rapport de diagnostic : modules exécutés")
+    for nom, details in rapport.items():
+        st.write(f"**{nom}** → Score : {details['valeur']:.4f} | Temps : {details['temps']:.4f} sec")
