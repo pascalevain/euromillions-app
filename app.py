@@ -18,6 +18,7 @@ st.sidebar.success("Accès confirmé. Mode Expert activé.")
 st.title("🎯 Optimisation Euromillions V4.0 - Mode Expert")
 st.markdown("_Développé par **Pascal EVAIN**_")
 
+# Import des modules d'analyse
 from markov import analyse_markov
 from arima import prevision_arima, score_arima
 from context import score_contexte
@@ -46,16 +47,17 @@ if fichier:
     instructions = st.text_area("📋 Consignes personnalisées pour guider la génération")
 
     if st.button("🚀 Lancer l'analyse et générer les grilles optimisées"):
-        # Modules d'analyse
+        # Modules d’analyse
         markov_result = analyse_markov(historique)
         arima_result = prevision_arima(historique)
         contexte = score_contexte(historique)
         meta_result = analyser_meta_distribution(historique)
 
-        # Fusion des résultats
+        # Fusion des résultats avec le modèle Pareto
         pareto_grilles = score_pareto(markov_result, arima_result, contexte, meta_result,
                                       n_large, n_croisée, n_recent)
 
+        # Affichage
         st.success(f"✅ {len(pareto_grilles)} grilles optimisées générées.")
         for i, (nums, stars, score) in enumerate(pareto_grilles):
             st.markdown(f"**Grille {i+1}** 🎱 : {' - '.join(map(str, nums))} ⭐ {' & '.join(map(str, stars))} → Score : {score:.2f}")
