@@ -1,15 +1,26 @@
-import streamlit as st
 import pandas as pd
 import numpy as np
-from datetime import datetime
+import streamlit as st
+from fpdf import FPDF
 
-# Importer les modules de traitement avancé
+# Authentification simple par mot de passe
+PASSWORD = "1701"
+mot_de_passe = st.sidebar.text_input("Mot de passe", type="password")
+if mot_de_passe != PASSWORD:
+    st.error("Accès restreint. Veuillez entrer le mot de passe.")
+    st.stop()
+
+st.sidebar.success("Accès confirmé. Mode Expert activé.")
+
+st.title("🎯 Optimisation Euromillions V4.0 - Mode Expert")
+st.markdown("_Développé par **Pascal EVAIN**_")
+
 from markov import analyse_markov
-from arima import analyse_arima
-from context import analyse_contexte
-from pareto import optimisation_pareto
-from meta_distributions import analyse_meta_distributions
-from diagnostic import afficher_diagnostics
+from arima import prevision_arima, score_arima
+from context import score_contexte
+from pareto import score_pareto
+from meta_distributions import analyser_meta_distribution, score_meta_distribution
+from diagnostic import tester_toutes_les_fonctions, afficher_rapport_diagnostic
 from pdf_export import exporter_pdf
 
 # Interface principale
