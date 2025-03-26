@@ -3,8 +3,8 @@ st.set_page_config(page_title="Euromillions V4.0 Expert", layout="centered")
 
 import pandas as pd
 import numpy as np
-import streamlit as st
 from fpdf import FPDF
+
 
 # Configuration de la page
 
