@@ -1,19 +1,7 @@
-import streamlit as st
 import pandas as pd
 import numpy as np
+import streamlit as st
 from fpdf import FPDF
-
-# Authentification simple par mot de passe
-PASSWORD = "1701"
-mot_de_passe = st.sidebar.text_input("Mot de passe", type="password")
-if mot_de_passe != PASSWORD:
-    st.error("Accès restreint. Veuillez entrer le mot de passe.")
-    st.stop()
-
-st.sidebar.success("Accès confirmé. Mode Expert activé.")
-
-st.title("🎯 Optimisation Euromillions V4.0 - Mode Expert")
-st.markdown("_Développé par **Pascal EVAIN**_")
 
 from markov import analyse_markov
 from arima import prevision_arima, score_arima
@@ -24,6 +12,10 @@ from diagnostic import tester_toutes_les_fonctions, afficher_rapport_diagnostic
 from pdf_export import exporter_pdf
 
 # Interface principale
+st.set_page_config(page_title="Euromillions V4.0 Expert", layout="centered")
+st.title("🎯 Optimisation Euromillions V4.0 - Mode Expert")
+st.markdown("_Développé par **Pascal EVAIN**_")
+
 st.title("📊 Lancement de l'optimisation complète")
 st.markdown("Cette version applique **l'intégralité** de la méthodologie V4.0, incluant l'analyse contextuelle, temporelle, markovienne, et les méta-distributions.")
 
