@@ -1,8 +1,13 @@
+import streamlit as st
+
+# Configuration de la page
+st.set_page_config(page_title="Euromillions V4.0 Expert", layout="centered")
+
 import pandas as pd
 import numpy as np
-import streamlit as st
 from fpdf import FPDF
 
+# Import des modules
 from markov import analyse_markov
 from arima import prevision_arima, score_arima
 from context import score_contexte
@@ -10,6 +15,9 @@ from pareto import score_pareto
 from diagnostic import tester_toutes_les_fonctions, afficher_rapport_diagnostic
 from pdf_export import exporter_pdf
 from meta_functions import analyser_meta_distribution, score_meta_distribution
+
+# Code suivant ...
+
 
 # Interface principale
 st.set_page_config(page_title="Euromillions V4.0 Expert", layout="centered")
