@@ -1,7 +1,3 @@
-import streamlit as st
-# Configuration de la page
-st.set_page_config(page_title="Euromillions V4.0 Expert", layout="centered")
-
 import pandas as pd
 import numpy as np
 from fpdf import FPDF
@@ -15,6 +11,8 @@ from pdf_export import exporter_pdf
 from meta_functions import analyser_meta_distribution, score_meta_distribution
 
 # Interface principale
+import streamlit as st
+
 st.title("🎯 Optimisation Euromillions V4.0 - Mode Expert")
 st.markdown("_Développé par **Pascal EVAIN**_")
 
@@ -55,13 +53,11 @@ instructions = st.text_area("📋 Consignes personnalisées pour guider la gén�
 
 # Lancer l'analyse
 if st.button("🚀 Lancer l'analyse et générer les grilles optimisées"):
-    # Modules d'analyse
     markov_result = analyse_markov(historique)
     arima_result = prevision_arima(historique)
     contexte = score_contexte(historique)
     meta_result = analyser_meta_distribution(historique)
 
-    # Fusion des résultats
     pareto_grilles = score_pareto(markov_result, arima_result, contexte, meta_result,
                                   n_large, n_croisée, n_recent)
 
@@ -69,11 +65,10 @@ if st.button("🚀 Lancer l'analyse et générer les grilles optimisées"):
     for i, (nums, stars, score) in enumerate(pareto_grilles):
         st.markdown(f"**Grille {i+1}** 🎱 : {' - '.join(map(str, nums))} ⭐ {' & '.join(map(str, stars))} → Score : {score:.2f}")
 
-    # Export PDF
     exporter_pdf(pareto_grilles, instructions)
     st.download_button("📄 Télécharger le rapport PDF", "rapport_euromillions_v4.pdf", mime="application/pdf")
 
-# Mode diagnostic (optionnel)
+# Mode diagnostic
 if st.checkbox("🧪 Activer le mode diagnostic"):
     resultats_test = tester_toutes_les_fonctions(historique)
     afficher_rapport_diagnostic(resultats_test)
