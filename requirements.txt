@@ -1,0 +1,6 @@
+streamlit
+pandas
+numpy
+fpdf
+scikit-learn
+statsmodels
