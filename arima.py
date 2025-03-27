@@ -2,30 +2,26 @@ import pandas as pd
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
 
-def prevision_arima(bitmap_df):
-    scores = []
-    for colonne in range(1, bitmap_df.shape[1]):
+def prevision_arima(historique):
+    resultat = {}
+    for i in range(len(historique)):
+        ligne = historique.iloc[i, 1:6].values  # Nombres principaux
+        etoiles = historique.iloc[i, 6:].values  # Étoiles
+        score = 0
         try:
-            serie = pd.to_numeric(bitmap_df.iloc[:, colonne], errors="coerce").dropna()
-            if len(serie) < 10:
-                scores.append(0)  # Trop peu de données
-                continue
-
-            modele = ARIMA(serie, order=(2, 0, 1))
-            resultat = modele.fit()
-            prediction = resultat.forecast()[0]
-            scores.append(prediction)
-        except Exception as e:
-            scores.append(0)  # En cas d’erreur ARIMA, on attribue 0
-    return scores
-
-def score_arima(scores):
-    if not scores:
-        return []
-    try:
-        max_score = max(scores)
-        if max_score == 0:
-            return [0] * len(scores)
-        return [s / max_score for s in scores]
-    except Exception:
-        return [0] * len(scores)
+            for col in range(1, historique.shape[1]):
+                serie = pd.to_numeric(historique.iloc[:, col], errors="coerce").dropna()
+                if len(serie) < 10:
+                    continue
+                modele = ARIMA(serie, order=(2, 0, 1))
+                fit = modele.fit()
+                prediction = fit.forecast()[0]
+                score += prediction
+        except:
+            score = 0
+        resultat[i] = {
+            "nums": list(ligne),
+            "stars": list(etoiles),
+            "score": score
+        }
+    return resultat
