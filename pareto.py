@@ -1,10 +1,11 @@
-def score_pareto(markov, arima, contexte, meta, n1, n2, n3):
+
+def score_pareto(markov, arima, context, meta, n_large, n_croisee, n_recent):
     grilles = []
-    for i in markov:
-        try:
-            score = markov[i]["score"] + arima[i]["score"] + contexte[i]["score"] + meta[i]["score"]
-            grilles.append((markov[i]["nums"], markov[i]["stars"], score))
-        except KeyError:
-            continue
+    for i in range(len(markov)):
+        if i in arima and i in context and i in meta:
+            score = markov[i]['score'] + arima[i]['score'] + context[i]['score'] + meta[i]['score']
+            nums = markov[i]['nums']
+            stars = markov[i]['stars']
+            grilles.append((nums, stars, score))
     grilles.sort(key=lambda x: x[2], reverse=True)
-    return grilles[:n1 + n2 + n3]
+    return grilles[:n_large + n_croisee + n_recent]
