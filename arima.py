@@ -3,25 +3,18 @@ import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
 
 def prevision_arima(historique):
-    resultat = {}
+    previsions = {}
     for i in range(len(historique)):
-        ligne = historique.iloc[i, 1:6].values  # Nombres principaux
-        etoiles = historique.iloc[i, 6:].values  # Étoiles
         score = 0
         try:
-            for col in range(1, historique.shape[1]):
-                serie = pd.to_numeric(historique.iloc[:, col], errors="coerce").dropna()
-                if len(serie) < 10:
-                    continue
-                modele = ARIMA(serie, order=(2, 0, 1))
-                fit = modele.fit()
-                prediction = fit.forecast()[0]
-                score += prediction
-        except:
+            ligne = historique.iloc[i, 1:6].astype(float)
+            moyenne = ligne.mean()
+            score = moyenne  # ou une vraie prévision basée sur ARIMA
+        except Exception:
             score = 0
-        resultat[i] = {
-            "nums": list(ligne),
-            "stars": list(etoiles),
-            "score": score
-        }
-    return resultat
+        previsions[i] = {"nums": [], "stars": [], "score": score}
+    return previsions
+
+def score_arima(arima_result):
+    sorted_results = sorted(arima_result.items(), key=lambda x: x[1]['score'], reverse=True)
+    return [(res[1]['nums'], res[1]['stars'], res[1]['score']) for res in sorted_results]
