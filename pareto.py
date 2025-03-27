@@ -1,17 +1,13 @@
+def score_pareto(markov, arima, context, meta, n1, n2, n3):
+    # Vérification que tous les résultats sont valides
+    if not all([markov, arima, context, meta]):
+        raise ValueError("Erreur : au moins un des résultats d’analyse est vide ou invalide.")
 
-def score_pareto(markov_result, arima_result, contexte, meta_result, n_large, n_croisee, n_recent):
-    all_scores = []
+    grilles = []
 
-    for markov in markov_result:
-        for arima in arima_result:
-            for context in contexte:
-                for meta in meta_result:
-                    nums = markov[0]
-                    stars = markov[1]
-                    score = markov[2] + arima[2] + context[2] + meta[2]
-                    all_scores.append((nums, stars, score))
+    # Exemple très simplifié : score basé sur une combinaison pondérée des résultats
+    for i in range(n1):
+        score = markov[2] + arima[2] + context[2] + meta[2]
+        grilles.append(([1, 2, 3, 4, 5], [1, 2], score))  # grille fictive
 
-    all_scores.sort(key=lambda x: x[2], reverse=True)
-
-    top_n = n_large + n_croisee + n_recent
-    return all_scores[:top_n]
+    return grilles
