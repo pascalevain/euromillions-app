@@ -1,27 +1,36 @@
 import pandas as pd
-import numpy as np
-from fpdf import FPDF
 
-from markov import analyse_markov
-from arima import prevision_arima, score_arima
-from context import score_contexte
-from pareto import score_pareto
-from diagnostic import tester_toutes_les_fonctions, afficher_rapport_diagnostic
-from pdf_export import exporter_pdf
+# Fonction de scoring Pareto multi-critères
 
-# Fonctions d’analyse des méta-distributions
-def analyser_meta_distribution(historique):
-    """
-    Calcule un score simple basé sur la moyenne des colonnes 1 à 5 du fichier historique.
-    Peut être remplacé par une méthode plus complexe ultérieurement.
-    """
-    scores = historique.iloc[:, 1:6].mean(axis=1)
-    return {i: score for i, score in enumerate(scores)}
+def score_pareto(markov, arima, contexte, meta, n_large=5, n_croisee=5, n_recent=5):
+    grilles = {}
+    # Fusionner toutes les grilles par index commun
+    for i in markov:
+        try:
+            score = (
+                markov[i]["score"] +
+                arima[i]["score"] +
+                contexte[i]["score"] +
+                meta[i]["score"]
+            )
+            grilles[i] = {
+                "nums": markov[i]["nums"],
+                "stars": markov[i]["stars"],
+                "score": score
+            }
+        except Exception as e:
+            continue
 
-def score_meta_distribution(meta_result):
-    """
-    Trie les résultats de méta-distribution par score décroissant.
-    """
-    return sorted(meta_result.items(), key=lambda x: x[1], reverse=True)
+    # Trier par score décroissant
+    grilles_tries = sorted(grilles.items(), key=lambda x: x[1]["score"], reverse=True)
 
+    # Découper les résultats selon les paramètres
+    resultats = []
+    count = 0
+    for i, (idx, val) in enumerate(grilles_tries):
+        if count >= (n_large + n_croisee + n_recent):
+            break
+        resultats.append((val["nums"], val["stars"], val["score"]))
+        count += 1
 
+    return resultats
