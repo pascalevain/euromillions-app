@@ -1,4 +1,6 @@
 from fpdf import FPDF
+import streamlit as st
+from io import BytesIO
 
 class PDF(FPDF):
     def header(self):
@@ -22,7 +24,18 @@ def exporter_pdf(grilles, instructions=""):
     pdf.ln(5)
     for i, (nums, stars, score) in enumerate(grilles):
         texte = f"Grille {i+1} : {' - '.join(map(str, nums))} + {' & '.join(map(str, stars))} → Score : {score:.2f}"
-        pdf.cell(0, 10, txt=texte.encode('latin-1', 'replace').decode('latin-1'), ln=True)
+        texte = texte.encode('latin-1', 'replace').decode('latin-1')  # Pour éviter les erreurs Unicode
+        pdf.cell(0, 10, txt=texte, ln=True)
 
-    # Génère le fichier PDF dans le dossier courant
-    pdf.output("rapport_euromillions_v4.pdf")
+    # Écriture dans un buffer mémoire (et non fichier disque)
+    buffer = BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
+
+    # Bouton de téléchargement dans Streamlit
+    st.download_button(
+        label="📄 Télécharger le rapport PDF",
+        data=buffer,
+        file_name="rapport_euromillions_v4.pdf",
+        mime="application/pdf"
+    )
