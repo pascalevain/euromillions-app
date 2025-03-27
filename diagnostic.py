@@ -1,27 +1,17 @@
 import pandas as pd
-import streamlit as st
 
 def tester_toutes_les_fonctions(historique):
-    try:
-        nb_tirages = len(historique)
-        nb_colonnes = historique.shape[1]
-
-        tests = {
-            "Tirages chargés": nb_tirages,
-            "Colonnes disponibles": nb_colonnes,
-            "Valeurs nulles": historique.isnull().sum().sum(),
-            "Lignes dupliquées": historique.duplicated().sum(),
-        }
-
-        tests["Format OK"] = isinstance(historique, pd.DataFrame)
-
-        return tests
-
-    except Exception as e:
-        return {"Erreur": str(e)}
-
+    if not isinstance(historique, pd.DataFrame):
+        return {"erreur": "Format de l'historique invalide"}
+    tests = {
+        "lignes": len(historique),
+        "colonnes": historique.shape[1],
+        "colonnes_vides": historique.isnull().sum().to_dict()
+    }
+    return tests
 
 def afficher_rapport_diagnostic(resultats):
-    st.subheader("🩺 Rapport de diagnostic")
+    import streamlit as st
+    st.subheader("🧪 Rapport de Diagnostic")
     for cle, valeur in resultats.items():
-        st.markdown(f"**{cle}** : {valeur}")
+        st.write(f"**{cle}** : {valeur}")
