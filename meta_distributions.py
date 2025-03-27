@@ -1,4 +1,3 @@
-
 import pandas as pd
 import numpy as np
 from fpdf import FPDF
@@ -12,6 +11,7 @@ from pdf_export import exporter_pdf
 from meta_distributions import analyser_meta_distribution, score_meta_distribution
 
 # Interface principale
+import streamlit as st
 st.title("🎯 Optimisation Euromillions V4.0 - Mode Expert")
 st.markdown("_Développé par **Pascal EVAIN**_")
 
@@ -58,3 +58,4 @@ if st.button("🚀 Lancer l'analyse et générer les grilles optimisées"):
 if st.checkbox("🧪 Activer le mode diagnostic"):
     resultats_test = tester_toutes_les_fonctions(historique)
     afficher_rapport_diagnostic(resultats_test)
+
