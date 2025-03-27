@@ -1,11 +1,11 @@
-def score_pareto(markov, arima, contexte, meta, n1, n2, n3):
-    grilles = []
-    for i in markov:
-        try:
-            score = markov[i]["score"] + arima[i]["score"] + contexte[i]["score"] + meta[i]["score"]
-            grilles.append((markov[i]["nums"], markov[i]["stars"], score))
-        except KeyError:
-            continue
-    grilles.sort(key=lambda x: x[2], reverse=True)
-    return grilles[:n1 + n2 + n3]
 
+import numpy as np
+
+def analyse_markov(historique):
+    resultats = {}
+    for i in range(len(historique)):
+        nums = list(range(1, 6))
+        stars = list(range(1, 3))
+        score = np.random.uniform(0, 1)
+        resultats[i] = {"nums": nums, "stars": stars, "score": score}
+    return resultats
