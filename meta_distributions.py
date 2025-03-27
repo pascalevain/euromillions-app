@@ -11,7 +11,6 @@ from pdf_export import exporter_pdf
 from meta_distributions import analyser_meta_distribution, score_meta_distribution
 
 # Interface principale
-import streamlit as st
 st.title("🎯 Optimisation Euromillions V4.0 - Mode Expert")
 st.markdown("_Développé par **Pascal EVAIN**_")
 
