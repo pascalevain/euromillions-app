@@ -2,43 +2,30 @@ import pandas as pd
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMA
 
-
-def prevision_arima(bitmap_df, colonne=0, ordre=(2, 1, 0), horizon=1):
-    """
-    Applique un modèle ARIMA à une colonne spécifique du bitmap pour prédire la tendance future.
-    Par défaut, prédit l'évolution de la première boule (colonne=0).
-
-    :param bitmap_df: DataFrame bitmap avec colonnes 0 à 50 (valeurs 0 ou 1).
-    :param colonne: Index de la colonne (boule) à analyser.
-    :param ordre: Tuple ARIMA (p, d, q).
-    :param horizon: Nombre de pas à prévoir.
-    :return: Liste des prévisions sur 'horizon' pas.
-    """
-    serie = bitmap_df.iloc[:, colonne].astype(float)
-
-    try:
-        modele = ARIMA(serie, order=ordre)
-        fit = modele.fit()
-        forecast = fit.forecast(steps=horizon)
-        return forecast.tolist()
-    except Exception as e:
-        print(f"Erreur ARIMA pour la colonne {colonne}: {e}")
-        return [0.0] * horizon
-
-
-def score_arima(bitmap_df, grille, horizon=1):
-    """
-    Calcule un score basé sur la tendance ARIMA pour chaque boule présente dans la grille.
-    Plus le score est élevé, plus les boules correspondent aux tendances prédites.
-
-    :param bitmap_df: Historique bitmap.
-    :param grille: Liste des boules de la grille à scorer (nombres de 1 à 50).
-    :param horizon: Nombre de pas à prévoir.
-    :return: Score moyen de correspondance à la tendance.
-    """
+def prevision_arima(bitmap_df):
     scores = []
-    for boule in grille:
-        prevision = prevision_arima(bitmap_df, colonne=boule - 1, horizon=horizon)[-1]
-        scores.append(prevision)
+    for colonne in range(1, bitmap_df.shape[1]):
+        try:
+            serie = pd.to_numeric(bitmap_df.iloc[:, colonne], errors="coerce").dropna()
+            if len(serie) < 10:
+                scores.append(0)  # Trop peu de données
+                continue
 
-    return float(np.mean(scores)) if scores else 0.0
+            modele = ARIMA(serie, order=(2, 0, 1))
+            resultat = modele.fit()
+            prediction = resultat.forecast()[0]
+            scores.append(prediction)
+        except Exception as e:
+            scores.append(0)  # En cas d’erreur ARIMA, on attribue 0
+    return scores
+
+def score_arima(scores):
+    if not scores:
+        return []
+    try:
+        max_score = max(scores)
+        if max_score == 0:
+            return [0] * len(scores)
+        return [s / max_score for s in scores]
+    except Exception:
+        return [0] * len(scores)
