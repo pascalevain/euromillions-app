@@ -1,20 +1,23 @@
-
 from fpdf import FPDF
 
+# Création d'un PDF simple avec encodage compatible
 def exporter_pdf(grilles, instructions=""):
-    if not grilles:
-        print("⚠️ Aucune grille à exporter.")
-        return
-
     pdf = FPDF()
     pdf.add_page()
     pdf.set_font("Arial", size=12)
-    pdf.cell(200, 10, txt="Rapport Euromillions V4.0 Expert", ln=True, align="C")
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    titre = "Rapport de Grilles Optimisées"
+    pdf.cell(200, 10, txt=titre.encode('latin-1', 'replace').decode('latin-1'), ln=True)
 
     if instructions:
-        pdf.multi_cell(0, 10, txt=f"Consignes personnalisées :\n{instructions}\n", align="L")
+        texte = f"Consignes : {instructions}"
+        texte = texte.encode('latin-1', 'replace').decode('latin-1')
+        pdf.multi_cell(0, 10, txt=texte)
 
     for i, (nums, stars, score) in enumerate(grilles):
-        pdf.cell(0, 10, txt=f"Grille {i+1} : {nums} ⭐ {stars} → Score : {score:.2f}", ln=True)
+        texte = f"Grille {i+1} : {nums} + {stars} → Score : {score:.2f}"
+        texte = texte.encode('latin-1', 'replace').decode('latin-1')
+        pdf.cell(200, 10, txt=texte, ln=True)
 
     pdf.output("rapport_euromillions_v4.pdf")
